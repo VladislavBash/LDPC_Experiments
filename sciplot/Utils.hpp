@@ -37,9 +37,9 @@
 #include <valarray>
 
 // sciplot includes
-#include <sciplot/Constants.hpp>
-#include <sciplot/Enums.hpp>
-#include <sciplot/Palettes.hpp>
+#include "Constants.hpp"
+#include "Enums.hpp"
+#include "Palettes.hpp"
 
 namespace sciplot
 {

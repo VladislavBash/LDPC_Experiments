@@ -31,10 +31,10 @@
 #include <vector>
 
 // sciplot includes
-#include <sciplot/Plot2D.hpp>
-#include <sciplot/Plot3D.hpp>
-#include <sciplot/specs/FontSpecsOf.hpp>
-#include <sciplot/specs/LayoutSpecs.hpp>
+#include "Plot2D.hpp"
+#include "Plot3D.hpp"
+#include "specs/FontSpecsOf.hpp"
+#include "specs/LayoutSpecs.hpp"
 
 namespace sciplot
 {

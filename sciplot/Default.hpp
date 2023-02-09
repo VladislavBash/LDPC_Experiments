@@ -29,8 +29,8 @@
 #include <cmath>
 
 // sciplot includes
-#include <sciplot/Constants.hpp>
-#include <sciplot/Enums.hpp>
+#include "Constants.hpp"
+#include "Enums.hpp"
 
 namespace sciplot
 {

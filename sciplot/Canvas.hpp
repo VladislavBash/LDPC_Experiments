@@ -30,7 +30,7 @@
 #include <vector>
 
 // sciplot includes
-#include <sciplot/Figure.hpp>
+#include "Figure.hpp"
 
 namespace sciplot
 {

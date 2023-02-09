@@ -30,24 +30,24 @@
 #include <vector>
 
 // sciplot includes
-#include <sciplot/Constants.hpp>
-#include <sciplot/Default.hpp>
-#include <sciplot/Enums.hpp>
-#include <sciplot/Palettes.hpp>
-#include <sciplot/StringOrDouble.hpp>
-#include <sciplot/Utils.hpp>
-#include <sciplot/specs/AxisLabelSpecs.hpp>
-#include <sciplot/specs/BorderSpecs.hpp>
-#include <sciplot/specs/DrawSpecs.hpp>
-#include <sciplot/specs/FillStyleSpecs.hpp>
-#include <sciplot/specs/FontSpecsOf.hpp>
-#include <sciplot/specs/GridSpecs.hpp>
-#include <sciplot/specs/HistogramStyleSpecs.hpp>
-#include <sciplot/specs/LegendSpecs.hpp>
-#include <sciplot/specs/LineSpecsOf.hpp>
-#include <sciplot/specs/TicsSpecs.hpp>
-#include <sciplot/specs/TicsSpecsMajor.hpp>
-#include <sciplot/specs/TicsSpecsMinor.hpp>
+#include "Constants.hpp"
+#include "Default.hpp"
+#include "Enums.hpp"
+#include "Palettes.hpp"
+#include "StringOrDouble.hpp"
+#include "Utils.hpp"
+#include "specs/AxisLabelSpecs.hpp"
+#include "specs/BorderSpecs.hpp"
+#include "specs/DrawSpecs.hpp"
+#include "specs/FillStyleSpecs.hpp"
+#include "specs/FontSpecsOf.hpp"
+#include "specs/GridSpecs.hpp"
+#include "specs/HistogramStyleSpecs.hpp"
+#include "specs/LegendSpecs.hpp"
+#include "specs/LineSpecsOf.hpp"
+#include "specs/TicsSpecs.hpp"
+#include "specs/TicsSpecsMajor.hpp"
+#include "specs/TicsSpecsMinor.hpp"
 
 namespace sciplot
 {

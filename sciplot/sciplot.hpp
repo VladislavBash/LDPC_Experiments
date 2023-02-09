@@ -35,15 +35,15 @@
 #endif // _WINDOWS_
 
 // sciplot includes
-#include <sciplot/Canvas.hpp>
-#include <sciplot/Constants.hpp>
-#include <sciplot/Default.hpp>
-#include <sciplot/Enums.hpp>
-#include <sciplot/Figure.hpp>
-#include <sciplot/Palettes.hpp>
-#include <sciplot/Plot.hpp>
-#include <sciplot/Plot2D.hpp>
-#include <sciplot/Plot3D.hpp>
-#include <sciplot/StringOrDouble.hpp>
-#include <sciplot/Utils.hpp>
-#include <sciplot/Vec.hpp>
+#include "Canvas.hpp"
+#include "Constants.hpp"
+#include "Default.hpp"
+#include "Enums.hpp"
+#include "Figure.hpp"
+#include "Palettes.hpp"
+#include "Plot.hpp"
+#include "Plot2D.hpp"
+#include "Plot3D.hpp"
+#include "StringOrDouble.hpp"
+#include "Utils.hpp"
+#include "Vec.hpp"
