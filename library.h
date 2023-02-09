@@ -1,0 +1,6 @@
+#ifndef LDPCEXPERIMENTS_LIBRARY_H
+#define LDPCEXPERIMENTS_LIBRARY_H
+
+bool decode(double p);
+
+#endif //LDPCEXPERIMENTS_LIBRARY_H
