@@ -29,6 +29,11 @@ add_custom_command(
               ${CMAKE_SOURCE_DIR}/H_with_padding.alist
               ${CMAKE_BINARY_DIR}/H_with_padding.alist
 )
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+# target_include_directories(LDPC_experiment PRIVATE sciplot)
+
 # add_executable(main main.cpp)
 # set(C_LIB ${CMAKE_BINARY_DIR}/libLDPCExperiments)
 # add_library(c STATIC IMPORTED GLOBAL)
