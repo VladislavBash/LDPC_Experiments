@@ -7,17 +7,26 @@ using namespace sciplot;
 void doCalcs(std::vector<double>& x, std::vector<double>& y, double step, const int up_const) {
     int up;
     int down;
-    for (double p = 0.5; p > 0; p=p-step) {
-        up = 0;
-        down = 0;
-        while (up != up_const) {
-            if (true || decode(p)) { // TODO: delete 'true ||'
+    int const max_down = 100;
+    for (double p = 0.5; p > 0; p=p-step) { // 9% -12% -15% переход
+        double sum = 0;
+        for (int j=0; j<30; j++) {
+            up = 0;
+            down = 0;
+            while (up != up_const) {
+            if (decode(p)) { // TODO: delete 'true ||'
                 up++;
             }
-            down++;
+            down++; // TODO: max_down = 10000
+            if (down == max_down)
+                std::cout << "MAX_DOWN" << std::endl;
+                break;
+            }
+        sum += ((double)up/down);
         }
         x.push_back(p);
-        y.push_back((double)up/down);
+        // std::cout << "PROGRESS " << x.size()*10 << "%" << std::endl;
+        y.push_back(sum/30.0);
     }
 }
 
@@ -47,7 +56,7 @@ void plotGraph(const std::vector<double>& x, const std::vector<double>& y) {
 int main() {
     std::vector<double> x = {};
     std::vector<double> y = {};
-    doCalcs(x, y, 0.05, 5);
+    doCalcs(x, y, 0.05, 50);
     std::reverse(x.begin(), x.end());
     std::reverse(y.begin(), y.end());
     plotGraph(x, y);
