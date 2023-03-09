@@ -8,8 +8,11 @@ enable_testing()
 add_executable(LDPC_experiment main.cpp)
 find_library(Lib libLDPCExperiments.a HINTS ${CMAKE_CURRENT_SOURCE_DIR})
 
+find_package(MPI REQUIRED)
 
-target_link_libraries(LDPC_experiment ${Lib})
+target_link_libraries(LDPC_experiment ${Lib} MPI::MPI_CXX)
+
+
 add_custom_command(
       TARGET LDPC_experiment POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy
