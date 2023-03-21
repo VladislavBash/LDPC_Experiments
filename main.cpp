@@ -13,10 +13,10 @@ using namespace sciplot;
 // up_const = 50;
 // loop_const = 5;
 
-void doCalcs(std::vector<double>& x, std::vector<double>& y, double step, const int& up_const, const int& loop_const, const int& max_down, double p) {
+void doCalcs(std::vector<double>& x, std::vector<double>& y, const double p_left, const double p_right, double step, const int& up_const, const int& loop_const, const int& max_down) {
     int up;
     int down;
-    for (p; p > 0; p=p-step) { // 9% -12% -15% переход
+    for (double p = p_right; p > p_left; p=p-step) { // 9% -12% -15% переход
         double sum = 0;
         for (int j=0; j<loop_const; j++) {
             // printf("Completed %f%\r",(j/loop_const)*100);
@@ -33,15 +33,30 @@ void doCalcs(std::vector<double>& x, std::vector<double>& y, double step, const 
             }
         sum += ((double)up/down);
         }
-        x.push_back(p);
+        x.push_back((double)(p/loop_const));
         // std::cout << "PROGRESS " << x.size()*10 << "%" << std::endl;
-        y.push_back(sum);
+        y.push_back((double)(sum/loop_const));
     }
     std::reverse(x.begin(), x.end());
     std::reverse(y.begin(), y.end());
 }
 
-void plotGraph(const std::vector<double>& x, const std::vector<double>& y) {
+void plotGraph(std::vector<double>& x, std::vector<double>& y) {
+    std::cout << "Here is plotGraph"  << x.size() << y.size() << x.at(0) << " " << y.at(0) << std::endl;
+    // for (double i: x) {
+    //     std::cout << i << " ";
+    // }
+    // for (std::vector<double>::iterator it = y.begin(); it != y.end(); it++) {
+    //     std::cout << *it << "";
+    // }
+    std::cout << *(y.begin()) << "";
+        // std::cout << "" << std::endl;  // Why is it crahing?
+    // for (auto j: y) {
+    //     std::cout << j;
+    // }
+    // for (int i = 0; i< x.size(); i++) {
+    //     std::cout << x.at(i) << " " << y.at(i) << std::endl;
+    // }
     Plot2D plot;
     plot.xlabel("x");
     plot.ylabel("y");
@@ -66,26 +81,33 @@ void plotGraph(const std::vector<double>& x, const std::vector<double>& y) {
     std::cin.ignore();
 }
 
-void y_plus(std::vector<double>& y, double* arr) {
-    // for (int i = 0; i<y.size(); i++) {
-    //     y.at(i) += arr[i];
-    // }
-    for (std::vector<double>::iterator it = y.begin(); it != y.end(); it++) {
-        *it += arr; 
-    }
-}
+// void y_plus(std::vector<double>& y, double* arr) {
+//     // for (int i = 0; i<y.size(); i++) {
+//     //     y.at(i) += arr[i];
+//     // }
+//     for (std::vector<double>::iterator it = y.begin(); it != y.end(); it++) {
+//         *it += arr; 
+//     }
+// }
 
-void divide(std::vector<double>& y, int const n) {
-    // for (auto& v: y) {
-    //     v /= n;
-    // }
-    for (std::vector<double>::iterator it = y.begin(); it != y.end(); it++) {
-        *it /= n; 
+// void divide(std::vector<double>& y, int const n) {
+//     // for (auto& v: y) {
+//     //     v /= n;
+//     // }
+//     for (std::vector<double>::iterator it = y.begin(); it != y.end(); it++) {
+//         *it /= n; 
+//     }
+// }
+
+void concatinate(std::vector<double>& x, std::vector<double>& y, double* arr_recv, const int size) {
+    for (int i = 0; i< size/2; i++) { 
+        y.push_back(arr_recv[i]);
+        x.push_back(arr_recv[(size/2)+i]);
     }
 }
 
 int main(int argc, char **argv) {
-    if (argc != 5) {
+    if (argc != 7) {
         std::cerr << "Error: Not all parameters were passed" << std::endl;
         return -1;
     }
@@ -96,11 +118,17 @@ int main(int argc, char **argv) {
     // loop_const = 5;
     // max_down = 200;
 
-    double const p = std::stod(argv[0]);
-    double const step = std::stod(argv[1]);
-    int const up_const = std::stoi(argv[2]);
-    int const loop_const = std::stoi(argv[3]);
-    int const max_down = std::stoi(argv[4]);
+    double p_left = std::stod(argv[1]);
+    double p_right = std::stod(argv[2]);
+    double const step = std::stod(argv[3]);
+    int const up_const = std::stoi(argv[4]);
+    int const loop_const = std::stoi(argv[5]);
+    int const max_down = std::stoi(argv[6]);
+
+    if (p_right <= p_left) {
+        std::cerr << "Error: p_right less or equal to p_left" << std::endl;
+        return -1;
+    }
 
     int thread_size = 0;
     int thread_rank = 0;
@@ -112,37 +140,77 @@ int main(int argc, char **argv) {
     std::vector<double> x = {};
     std::vector<double> y = {};
 
-    doCalcs(x, y, step, up_const, loop_const, max_down, p);
+    double b = (double)((p_right - p_left)/thread_size); // step of process
+    p_left = p_left + b*thread_rank; // p_left of process
+    p_right = p_left + b; // p_right of process
+    std::cout << "pleft and pright " << thread_rank << " " << p_left << " " << p_right << std::endl;
+    doCalcs(x, y, p_left, p_right, step, up_const, loop_const, max_down);
 
     if (thread_rank == 0) {
         // double arr_recv[x.size()+y.size()];
         // std::vector<double> arr_recv = {};
-        double* arr_recv = new double[ceil(p/step)];
+        double* arr_recv = new double[(int)ceil((p_right - p_left)/(step*thread_size))];
         MPI_Status status_recv;
+        const int size = x.size()+y.size();
 
         for (int i=0; i<thread_size-1; i++) {
-            MPI_Recv(&arr_recv, x.size()+y.size(), MPI_DOUBLE, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status_recv);
-            y_plus(y, arr_recv);
+            // std::cout << "RECV EROR" << std::endl;
+            MPI_Recv(arr_recv, size, MPI_DOUBLE, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status_recv);
+            // y_plus(y, arr_recv);
+            // std::cout << "AFTER RECV EROR" << std::endl;
+            // std::cout << "" << std::endl;
+            // std::cout << "" << std::endl;
+            // std::cout << "PRINT ";
+            // for (int i = 0; i<x.size()+y.size(); i++) {
+            // std::cout << arr_recv[i] << " ";
+            // }
+            // std::cout << "" << std::endl;
+            // std::cout << "" << std::endl;
+            // std:: cout << "PRINT " << arr_recv[0];
+            // std::cout << "AFTER RECV FOR" << std::endl;
+            // std::cout << "AFTER RECV EROR" << std::endl;
+            std::cout << "x.size()+y.size()    " << size << std::endl;
+            concatinate(x, y, arr_recv, size);
+            std::cout << "AFTER CONCAT EROR" << std::endl;
         }
+        std::cout << "delete arr_recv" << std::endl;
         delete arr_recv;
-        divide(y, loop_const*thread_size);
-
+        // divide(y, loop_const*thread_size);
+        std::cout << "plotGraph(x, y);" << std::endl;
+        std::cout << "x size is " << x.size() << std::endl;
+        std::cout << "y size is " << y.size() << std::endl;
+        for (double i: x) {
+            std::cout << i << " ";
+        }
+        // std::cout << "" << std::endl;  // Why is it crahing?
+        // for (double j: y) {
+        //     std::cout << j << " ";
+        // }
+        std::cout << "" << std::endl;
+        std::cout << " BEFORE plotGraph(x, y);" << std::endl;
         plotGraph(x, y);
+        std::cout << " AFTER plotGraph(x, y);" << std::endl;
     } else {
         // double arr_recv[x.size()+y.size()];
-        std::vector<double> arr_recv = {};
-
+        std::vector<double> arr_recv(x.size()+y.size(),0);
+        // std::cout << "BEFORE SEND: for EROR" << std::endl;
         for (int i = 0; i<y.size(); i++) {
             arr_recv[i] = y.at(i);
             arr_recv[y.size()+i] = x.at(i);
         }
-
+        // std::cout << "thread_rank " << thread_rank << " ";
+        // for (int i = 0; i<arr_recv.size(); i++) {
+        //     std:: cout << " " << arr_recv.data()[i];
+        // }
+        // std::cout << " " << std::endl;
+        // std::cout << "SEND EROR" << std::endl;
         MPI_Send(arr_recv.data(), x.size()+y.size(), MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+        // std::cout << " AFTER SEND EROR" << std::endl;
     }
     MPI_Finalize();
     return 0; 
 }
 
 // in order to run program:
-//      mpiexec -n 5 C:\Users\79150\Documents\Programming\LDPC_Experiments\build\LDPC_experiment.exe <p> <step up_const> <loop_const> <max_down>
-//      mpiexec -n 5 C:\Users\79150\Documents\Programming\LDPC_Experiments\build\LDPC_experiment.exe 0.2 0.001 50 5 200
+//      mpiexec -n 5 C:\Users\79150\Documents\Programming\LDPC_Experiments\build\LDPC_experiment.exe <p_left> <p_right> <step up_const> <loop_const> <max_down>
+//      mpiexec -n 5 C:\Users\79150\Documents\Programming\LDPC_Experiments\build\LDPC_experiment.exe 0.1 0.2 0.001 50 5 200
