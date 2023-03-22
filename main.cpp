@@ -13,13 +13,32 @@ using namespace sciplot;
 // up_const = 50;
 // loop_const = 5;
 
-void doCalcs(std::vector<double>& x, std::vector<double>& y, const double p_left, const double p_right, double step, const int& up_const, const int& loop_const, const int& max_down) {
+void doCalcs(std::vector<double>& x, std::vector<double>& y, const double p_left, const double p_right, double step, const int& up_const, const int& loop_const, const int& max_down, const int thread_rank) {
     int up;
     int down;
+    // std::cout << "PROGRESS " << thread_rank << std::endl;
+    // if (thread_rank == 3) {
+    //     std::cout << "p_right   " << p_right << std::endl;
+    //     std::cout << "p_left   " << p_left << std::endl;
+    //     std::cout << "step   " << step << std::endl;
+    //     std::cout <<"p    ";
+    // }
+    // if (thread_rank == 0) {
+    //     std::cout << "p_right   " << p_right << std::endl;
+    //     std::cout << "p_left   " << p_left << std::endl;
+    //     std::cout << "step   " << step << std::endl;
+    //     std::cout <<"p    ";
+    // }
     for (double p = p_right; p > p_left; p=p-step) { // 9% -12% -15% переход
         double sum = 0;
+        // if (thread_rank == 3) {
+        // std::cout << p << " ";
+        // }
+        // if (thread_rank == 0) {
+        // std::cout << p << " ";
+        // }
         for (int j=0; j<loop_const; j++) {
-            // printf("Completed %f%\r",(j/loop_const)*100);
+            // std::cout << "Completed %f%\r" << (j/loop_const)*100;
             up = 0;
             down = 0;
             while (up != up_const) {
@@ -33,9 +52,13 @@ void doCalcs(std::vector<double>& x, std::vector<double>& y, const double p_left
             }
         sum += ((double)up/down);
         }
-        x.push_back((double)(p/loop_const));
-        // std::cout << "PROGRESS " << x.size()*10 << "%" << std::endl;
+        x.push_back((double)(p));
         y.push_back((double)(sum/loop_const));
+
+        std::cout << "PROGRESS " << thread_rank << " " << 100-round((double)((p-p_left)*100*100/(p_right-p_left)))/100 << "%" << std::endl;
+        
+        // std::cout << "PROGRESS " << 100-round((double)((p-p_left)*100*100/(p_right-p_left)))/100 << "%\r";
+        // std::cout << 100-round((double)((p-p_left)*100*100/(p_right-p_left)))/100 << "%\n";
     }
     std::reverse(x.begin(), x.end());
     std::reverse(y.begin(), y.end());
@@ -49,8 +72,9 @@ void plotGraph(std::vector<double>& x, std::vector<double>& y) {
     // for (std::vector<double>::iterator it = y.begin(); it != y.end(); it++) {
     //     std::cout << *it << "";
     // }
-    std::cout << *(y.begin()) << "";
-        // std::cout << "" << std::endl;  // Why is it crahing?
+    std::cout << *(y.begin()) << std::endl;
+    std::cout << "CHECKPOINT" << std::endl;
+    // std::cout << "" << std::endl;  // Why is it crahing?
     // for (auto j: y) {
     //     std::cout << j;
     // }
@@ -144,18 +168,30 @@ int main(int argc, char **argv) {
     p_left = p_left + b*thread_rank; // p_left of process
     p_right = p_left + b; // p_right of process
     std::cout << "pleft and pright " << thread_rank << " " << p_left << " " << p_right << std::endl;
-    doCalcs(x, y, p_left, p_right, step, up_const, loop_const, max_down);
-
+    doCalcs(x, y, p_left, p_right, step, up_const, loop_const, max_down, thread_rank);
+    std::cout << "SIZE IS " << x.size()+y.size() << std::endl;
+    std::cout << "X.SIZE IS " << x.size() << std::endl;
+    std::cout << "Y.SIZE IS " << y.size() << std::endl;
     if (thread_rank == 0) {
         // double arr_recv[x.size()+y.size()];
         // std::vector<double> arr_recv = {};
-        double* arr_recv = new double[(int)ceil((p_right - p_left)/(step*thread_size))];
-        MPI_Status status_recv;
-        const int size = x.size()+y.size();
 
+        // double* arr_recv = new double[(int)ceil((p_right - p_left)/(step*thread_size))];
+        double* arr_recv = new double[x.size()+y.size()];
+
+        // std::cout << "!!!!!" << (int)ceil((p_right - p_left)/(step*thread_size)) << std::endl;
+        // std::cout << "!!!!!" << p_right - p_left << std::endl;
+        // std::cout << "!!!!!" << step*thread_size << std::endl;
+        // std::cout << "!!!" << ceil((p_right - p_left)/(step*thread_size)) << std::endl;
+        // std::cout << "!!!!!" << x.size()+y.size() << std::endl;
+        
+        MPI_Status status_recv;
+        // const int size = x.size()+y.size();
+        int* size = new int[1];
         for (int i=0; i<thread_size-1; i++) {
             // std::cout << "RECV EROR" << std::endl;
-            MPI_Recv(arr_recv, size, MPI_DOUBLE, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status_recv);
+            MPI_Recv(size, 1, MPI_INT, i+1, 0, MPI_COMM_WORLD, &status_recv);
+            MPI_Recv(arr_recv, *size, MPI_DOUBLE, i+1, 1, MPI_COMM_WORLD, &status_recv);
             // y_plus(y, arr_recv);
             // std::cout << "AFTER RECV EROR" << std::endl;
             // std::cout << "" << std::endl;
@@ -169,12 +205,16 @@ int main(int argc, char **argv) {
             // std:: cout << "PRINT " << arr_recv[0];
             // std::cout << "AFTER RECV FOR" << std::endl;
             // std::cout << "AFTER RECV EROR" << std::endl;
-            std::cout << "x.size()+y.size()    " << size << std::endl;
-            concatinate(x, y, arr_recv, size);
+            std::cout << "x.size()+y.size()    " << *size << std::endl;
+            concatinate(x, y, arr_recv, *size);
             std::cout << "AFTER CONCAT EROR" << std::endl;
         }
-        std::cout << "delete arr_recv" << std::endl;
-        delete arr_recv;
+        std::cout << "delete arr_recv ptr" << std::endl;
+        arr_recv = nullptr;
+        std::cout << "delete size ptr" << std::endl;
+        size = nullptr;
+        // delete arr_recv;
+        // delete size;
         // divide(y, loop_const*thread_size);
         std::cout << "plotGraph(x, y);" << std::endl;
         std::cout << "x size is " << x.size() << std::endl;
@@ -182,13 +222,14 @@ int main(int argc, char **argv) {
         for (double i: x) {
             std::cout << i << " ";
         }
-        // std::cout << "" << std::endl;  // Why is it crahing?
-        // for (double j: y) {
-        //     std::cout << j << " ";
-        // }
+        std::cout << "" << std::endl;  // Why is it crahing?
+        for (double j: y) {
+            std::cout << j << " ";
+        }
         std::cout << "" << std::endl;
         std::cout << " BEFORE plotGraph(x, y);" << std::endl;
         plotGraph(x, y);
+
         std::cout << " AFTER plotGraph(x, y);" << std::endl;
     } else {
         // double arr_recv[x.size()+y.size()];
@@ -204,7 +245,9 @@ int main(int argc, char **argv) {
         // }
         // std::cout << " " << std::endl;
         // std::cout << "SEND EROR" << std::endl;
-        MPI_Send(arr_recv.data(), x.size()+y.size(), MPI_DOUBLE, 0, 0, MPI_COMM_WORLD);
+        int size = x.size()+y.size(); 
+        MPI_Send(&size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(arr_recv.data(), x.size()+y.size(), MPI_DOUBLE, 0, 1, MPI_COMM_WORLD);
         // std::cout << " AFTER SEND EROR" << std::endl;
     }
     MPI_Finalize();
