@@ -142,7 +142,3 @@ int main(int argc, char **argv) {
     MPI_Finalize();
     return 0; 
 }
-
-// in order to run program:
-//      mpiexec -n 5 C:\Users\79150\Documents\Programming\LDPC_Experiments\build\LDPC_experiment.exe <p_visible_left> <p_visible_right> <p_left> <p_right> <step> <up_const> <loop_const> <max_down>
-//      mpiexec -n 5 C:\Users\79150\Documents\Programming\LDPC_Experiments\build\LDPC_experiment.exe 0 0.25 0.08 0.15 0.0001 50 50 200
