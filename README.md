@@ -1,7 +1,7 @@
 # LDPC_Experiments
-## Usage
+## Использование
 ```
-mpiexec -n N C:\Users\79150\Documents\Programming\LDPC_Experiments\build\LDPC_experiment.exe [p_visible_left] [p_visible_right] [p_left] [p_right] [step] [up_const] [loop_const] [max_down]
+mpiexec -n [N] C:\Users\79150\Documents\Programming\LDPC_Experiments\build\LDPC_experiment.exe [p_visible_left] [p_visible_right] [p_left] [p_right] [step] [up_const] [loop_const] [max_down]
 ```
 - `N` - число запускаемых процессов
 - `p_visible_left` - левая граница оси абцисс на нарисованном графике
